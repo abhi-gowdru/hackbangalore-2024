@@ -4,21 +4,32 @@ import DefaultLayout from "@/layouts/default";
 import NextLink from "next/link";
 
 
-import { Button, Input, Card, CardBody, Checkbox, Image } from "@nextui-org/react";
+
+import { Button, Input, Card, CardBody, Image } from "@nextui-org/react";
 import {
-    EyeFilledIcon, EyeSlashFilledIcon, GoogleIcon
+    EyeFilledIcon, EyeSlashFilledIcon
 } from "@/components/icons";
 import { Divider } from "@nextui-org/divider";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from '@/backend/db_config';
+import {
+    GoogleIcon
+} from "@/components/icons";
 
 import { doc, setDoc } from 'firebase/firestore';
 
 export default function LogIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confpassword, setconfPassword] = useState('');
+
     const [isVisible, setIsVisible] = useState(false);
+    const [isconfVisible, setIsVisibleconf] = useState(false);
+
     const [isEmailTouched, setIsEmailTouched] = useState(false);
+    const [isPasswordTouched, setIsPasswordTouched] = useState(false);
+    const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] = useState(false);
+
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -26,29 +37,54 @@ export default function LogIn() {
     const router = useRouter();
 
     const validateEmail = (email) => email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
+    const validatePassword = (password) => password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
 
     const isEmailInvalid = useMemo(() => {
         if (!isEmailTouched || email === "") return false;
         return validateEmail(email) ? false : true;
     }, [email, isEmailTouched]);
 
+    const isPasswordInvalid = useMemo(() => {
+        if (!isPasswordTouched || password === "") return false;
+        return validatePassword(password) ? false : true;
+    }, [password, isPasswordTouched]);
+
+    const isConfirmPasswordInvalid = useMemo(() => {
+        if (!isConfirmPasswordTouched || confpassword === "") return false;
+        return confpassword === "" || confpassword !== password;
+    }, [confpassword, password, isConfirmPasswordTouched]);
+
+
 
     const handleLogIn = async (e) => {
         setIsLoading(true);
         e.preventDefault();
         try {
-            if (email === "" || password === "") {
+            if (email === "" || password === "" || confpassword === "") {
                 setError('Email and password are required');
                 setIsLoading(false);
                 return;
             }
+
             if (!validateEmail(email)) {
                 setError('Please enter a valid email');
                 setIsLoading(false);
                 return;
             }
 
-            const authresp = await signInWithEmailAndPassword(auth, email, password);
+            if (!validatePassword(password)) {
+                setError("Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character");
+                setIsLoading(false);
+                return;
+            }
+
+            if (password !== confpassword) {
+                setError("Passwords do not match");
+                setIsLoading(false);
+                return;
+            }
+
+            const authresp = await createUserWithEmailAndPassword(auth, email, confpassword);
 
             if (authresp) {
                 console.log(authresp.user.email);
@@ -80,13 +116,6 @@ export default function LogIn() {
         }
     }
 
-    const closeAlert = () => {
-        setError("");
-    };
-
-    const toggleVisibility = () => setIsVisible(!isVisible);
-
-
     const storeUserInfo = async (user) => {
         const userRef = doc(db, "users", user.email); // Create a document with UID as the document ID
         try {
@@ -101,6 +130,14 @@ export default function LogIn() {
             setError(error.code);
         }
     };
+
+    const closeAlert = () => {
+        setError("");
+    };
+
+    const toggleVisibility = () => setIsVisible(!isVisible);
+    const toggleVisibilityConf = () => setIsVisibleconf(!isconfVisible);
+
 
     return (
         <DefaultLayout>
@@ -117,8 +154,8 @@ export default function LogIn() {
                             />
                         </div>
 
-                        <p>Welcome Back</p>
-                        <p>Log in to your account to continue</p>
+                        <p>Welcome</p>
+                        <p>Create your account to get started</p>
                     </div>
 
                     <Card className="min-w-[360px] max-w-[380px] p-4">
@@ -169,19 +206,44 @@ export default function LogIn() {
                                         }
                                         type={isVisible ? "text" : "password"}
                                         className="max-w-xs my-1"
+                                        isInvalid={isPasswordInvalid}
+                                        color={isPasswordInvalid ? "danger" : "default"}
+                                        errorMessage={isPasswordInvalid && "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character"}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        onBlur={() => setIsPasswordTouched(true)}
                                         value={password}
                                         variant="bordered"
                                         placeholder="Enter your password"
 
                                     />
-                                    <div className="flex justify-between ...">
-                                        <div><Checkbox size="sm" className="my-1">Remember me</Checkbox></div>
-                                        <div><p className="text-sm hover:text-slate-400 my-3">Forgot password?</p></div>
+                                    <Input
+                                        label="Confirm Password"
+                                        endContent={
+                                            <button className="focus:outline-none" type="button" onClick={toggleVisibilityConf}>
+                                                {isconfVisible ? (
+                                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                ) : (
+                                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                )}
+                                            </button>
+                                        }
+                                        type={isconfVisible ? "text" : "password"}
+                                        className="max-w-xs my-3 w-full"
+                                        onChange={(e) => setconfPassword(e.target.value)}
+                                        value={confpassword}
+                                        variant="bordered"
+                                        isInvalid={isConfirmPasswordInvalid}
+                                        color={isConfirmPasswordInvalid ? "danger" : "default"}
+                                        errorMessage={isConfirmPasswordInvalid && "Passwords do not match"}
+                                        onBlur={() => setIsConfirmPasswordTouched(true)}
+                                        placeholder="Enter your confirm password"
+                                    />
+                                    <div className="text-center text-xs">
+                                        By clicking Agree & Join, you agree to the our User Agreement, Privacy Policy, and Cookie Policy.
                                     </div>
 
-                                    <Button type="submit" color="primary" radius="md" className="my-3 w-full" isDisabled={!(email && password && !isEmailInvalid)} isLoading={isLoading}>
-                                        Log In
+                                    <Button type="submit" color="primary" radius="md" className="my-3 w-full" isDisabled={!(email && password && confpassword && !isEmailInvalid && !isPasswordInvalid && !isConfirmPasswordInvalid)} isLoading={isLoading}>
+                                        Agree and Join
                                     </Button>
 
 
@@ -194,9 +256,9 @@ export default function LogIn() {
                                 </Button>
                             </div>
                             <div className="flex justify-center text-sm mt-4">
-                                Need to create an account?  &nbsp; <NextLink
-                                    href="/register"
-                                ><span className="text-blue-600 hover:text-blue-400 transition delay-300 duration-300 ease-in-out">Sign Up</span></NextLink>
+                                Already on NewApp? &nbsp; <NextLink
+                                    href="/login"
+                                ><span className="text-blue-600 hover:text-blue-400 transition delay-300 duration-300 ease-in-out">Sign in</span></NextLink>
                             </div>
                         </CardBody>
                     </Card>
@@ -204,4 +266,4 @@ export default function LogIn() {
             </section>
         </DefaultLayout>
     );
-}   
+}

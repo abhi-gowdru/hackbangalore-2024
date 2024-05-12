@@ -14,17 +14,29 @@ export const siteConfig = {
     },
     {
       label: "Calculators",
-      href: "/about",
+      href: "/calculators",
     },
   ],
   navMenuItems: [
     {
-      label: "Home",
+      label: "Business Loan",
       href: "/",
     },
     {
-      label: "About",
+      label: "Credit Tracker",
       href: "/about",
+    },
+    {
+      label: "Calculators",
+      href: "/calculators",
+    },
+    {
+      label: "Login",
+      href: "/login",
+    },
+    {
+      label: "Register",
+      href: "/register",
     },
   ],
   links: {

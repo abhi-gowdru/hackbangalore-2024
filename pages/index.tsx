@@ -1,12 +1,24 @@
 import DefaultLayout from "@/layouts/default";
+import FAQ from "@/components/LandingPage/FAQ";
+import WhyToApply from "@/components/LandingPage/sections/whytoapply";
+import MainBanner from "@/components/LandingPage/sections/main_banner";
+import CustomerLogo from "@/components/LandingPage/sections/customer_logo";
 
 export default function IndexPage() {
 	return (
 		<DefaultLayout>
-			<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-				<div className="inline-block max-w-lg text-center justify-center">
-				</div>
+			<section id="main_banner">
+				<MainBanner></MainBanner>
 			</section>
-		</DefaultLayout>
+			<section id="whytoapply">
+				<WhyToApply></WhyToApply>
+			</section>
+			<section id="customer_logo">
+				<CustomerLogo></CustomerLogo>
+			</section>
+			<section id="faq">
+				<FAQ></FAQ>
+			</section>
+		</DefaultLayout >
 	);
 }

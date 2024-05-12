@@ -12,13 +12,14 @@ import {
 
 import { link as linkStyles } from "@nextui-org/theme";
 
+import { motion } from "framer-motion";
+
 import { siteConfig } from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
-import { Logo } from "@/components/icons";
 
 export const Navbar = () => {
 	return (
@@ -26,28 +27,30 @@ export const Navbar = () => {
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 				<NavbarBrand className="gap-3 max-w-fit">
 					<NextLink className="flex justify-start items-center gap-1" href="/">
-						<Logo />
-						<p className="font-bold text-inherit"></p>
+						<p className="font-bold font-serif text-inherit text-lg">OpenPe</p>
 					</NextLink>
 				</NavbarBrand>
 
 			</NavbarContent>
 
 			<NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
+
 				<div className="hidden lg:flex gap-4 justify-end ml-2">
 					{siteConfig.navItems.map((item) => (
-						<NavbarItem key={item.href}>
-							<NextLink
-								className={clsx(
-									linkStyles({ color: "foreground" }),
-									"data-[active=true]:text-primary data-[active=true]:font-medium"
-								)}
-								color="foreground"
-								href={item.href}
-							>
-								{item.label}
-							</NextLink>
-						</NavbarItem>
+						<motion.div whileHover={{ scale: 1.08 }} key={item.href}>
+							<NavbarItem>
+								<NextLink
+									className={clsx(
+										linkStyles({ color: "foreground" }),
+										"data-[active=true]:text-primary data-[active=true]:font-medium"
+									)}
+									color="foreground"
+									href={item.href}
+								>
+									{item.label}
+								</NextLink>
+							</NavbarItem>
+						</motion.div>
 					))}
 				</div>
 				<NextLink
@@ -78,13 +81,13 @@ export const Navbar = () => {
 				<div className="mx-4 mt-2 flex flex-col gap-2">
 					{siteConfig.navMenuItems.map((item, index) => (
 						<NavbarMenuItem key={`${item}-${index}`}>
-							<Link
+							<NextLink
 								color="primary"
-								href="#"
+								href={item.href}
 								size="lg"
 							>
 								{item.label}
-							</Link>
+							</NextLink>
 						</NavbarMenuItem>
 					))}
 				</div>

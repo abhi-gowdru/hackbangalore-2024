@@ -1,7 +1,7 @@
 // withAuth.js
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import auth from "@/backend/db_config";
+import { auth } from "@/backend/db_config";
 
 const withAuth = (WrappedComponent) => {
   const AuthComponent = (props) => {
