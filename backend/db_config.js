@@ -3,13 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDO-CTaRBzSjCR4C5nnluMP6nHeit5FM1M",
-  authDomain: "hack-bangalore-2024.firebaseapp.com",
-  projectId: "hack-bangalore-2024",
-  storageBucket: "hack-bangalore-2024.appspot.com",
-  messagingSenderId: "403908037976",
-  appId: "1:403908037976:web:26e1d0b4e9c288fc6fa92d",
-  measurementId: "G-6271NR4JX2"
+  //Add your Firebase configruation
 };
 
 // Initialize Firebase
